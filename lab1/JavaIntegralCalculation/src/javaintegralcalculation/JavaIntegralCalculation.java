@@ -4,6 +4,8 @@
  */
 package javaintegralcalculation;
 
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
 /**
  *
  * @author student_m
@@ -49,7 +51,7 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jPanel1.setBackground(new java.awt.Color(51, 102, 255));
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Data", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 12), new java.awt.Color(255, 255, 255))); // NOI18N
 
         jTextFieldLowerLimit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -104,7 +106,8 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         );
 
         jPanel2.setBackground(new java.awt.Color(51, 102, 255));
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(null, null, null, null, new java.awt.Font("Tahoma", 0, 12), new java.awt.Color(204, 255, 255))); // NOI18N
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Actions", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Tahoma", 0, 12), new java.awt.Color(204, 255, 255))); // NOI18N
+        jPanel2.setToolTipText("");
 
         jButtonAdd.setText("Add item");
         jButtonAdd.addActionListener(new java.awt.event.ActionListener() {
@@ -114,10 +117,20 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         });
 
         jButtonDelete.setText("Delete item");
+        jButtonDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDeleteActionPerformed(evt);
+            }
+        });
 
         jButtonCalculate.setText("Calculate");
+        jButtonCalculate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCalculateActionPerformed(evt);
+            }
+        });
 
-        jTable1.setBorder(javax.swing.BorderFactory.createTitledBorder(null));
+        jTable1.setBorder(javax.swing.BorderFactory.createTitledBorder(""));
         jTable1.setForeground(new java.awt.Color(204, 0, 0));
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -194,8 +207,78 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
 
     private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
         // TODO add your handling code here:
+        double upperLim;
+    double lowLim;
+    double step;
+
+    try {
+        lowLim = Double.parseDouble(jTextFieldLowerLimit.getText());
+        upperLim = Double.parseDouble(jTextFieldUpperLimit.getText());
+        step = Double.parseDouble(jTextFieldStep.getText());
+
+        DefaultTableModel tModel = (DefaultTableModel) jTable1.getModel();
+
+        tModel.addRow(new Object[]{lowLim, upperLim, step, ""});
+
+        // Optional: clear fields after adding
+        jTextFieldLowerLimit.setText("");
+        jTextFieldUpperLimit.setText("");
+        jTextFieldStep.setText("");
+
+    } catch (NumberFormatException e) {
+        JOptionPane.showMessageDialog(null, "Please enter valid numbers!");
+    }
     }//GEN-LAST:event_jButtonAddActionPerformed
 
+    private void jButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteActionPerformed
+        // TODO add your handling code here:
+        DefaultTableModel tModel = (DefaultTableModel) jTable1.getModel();
+        
+        int rowNum = jTable1.getSelectedRow();
+        if (rowNum == -1){
+            JOptionPane.showMessageDialog(null, "You need to select a row");
+        }else{
+            tModel.removeRow(rowNum);
+        }
+    }//GEN-LAST:event_jButtonDeleteActionPerformed
+
+    private void jButtonCalculateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCalculateActionPerformed
+        // TODO add your handling code here:
+        int rowNum = jTable1.getSelectedRow();
+        
+        if(rowNum == -1){
+            JOptionPane.showMessageDialog(null,"You need to select a row");
+        }else{
+            DefaultTableModel tModel = (DefaultTableModel) jTable1.getModel();
+            double upperLim;
+            double lowLim;
+            double step;
+            double result;
+            lowLim = Double.parseDouble(tModel.getValueAt(rowNum, 0).toString());
+            upperLim = Double.parseDouble(tModel.getValueAt(rowNum, 1).toString());
+            step = Double.parseDouble(tModel.getValueAt(rowNum, 2).toString());
+            
+            result = CalcIntegral(lowLim, upperLim, step);
+            tModel.setValueAt(result, rowNum, 3);
+    }
+    }//GEN-LAST:event_jButtonCalculateActionPerformed
+
+    public double CalcIntegral(double lowLim, double upLim, double step)
+{
+    double start = lowLim;
+    double h;
+    double sumS = 0;
+
+    while (start < upLim) {
+        h = Math.min(step, upLim - start);
+
+        sumS += h * (Math.sin(start) + Math.sin(start + h)) / 2;
+
+        start += h;
+    }
+
+    return sumS;
+}
     /**
      * @param args the command line arguments
      */
