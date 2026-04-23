@@ -4,6 +4,7 @@
  */
 package javaintegralcalculation;
 
+import java.util.ArrayList;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JOptionPane;
 /**
@@ -15,10 +16,12 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     /**
      * Creates new form JavaIntegralCalculation
      */
+    private ArrayList<RecIntegral> arrInteg = new ArrayList<>();
     public JavaIntegralCalculation() {
         initComponents();
     }
 
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -43,6 +46,8 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         jButtonCalculate = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
+        jButtonClear = new javax.swing.JButton();
+        jButtonFill = new javax.swing.JButton();
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
@@ -151,32 +156,54 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         jTable1.setSelectionBackground(new java.awt.Color(204, 0, 0));
         jScrollPane2.setViewportView(jTable1);
 
+        jButtonClear.setText("Clear table");
+        jButtonClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonClearActionPerformed(evt);
+            }
+        });
+
+        jButtonFill.setText("Fill from collection");
+        jButtonFill.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonFillActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addContainerGap(33, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addContainerGap(33, Short.MAX_VALUE)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(38, 38, 38)
                         .addComponent(jButtonAdd)
-                        .addGap(77, 77, 77)
+                        .addGap(99, 99, 99)
                         .addComponent(jButtonDelete)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButtonCalculate)))
+                        .addComponent(jButtonCalculate))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(53, 53, 53))
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(127, 127, 127)
+                .addComponent(jButtonClear)
+                .addGap(50, 50, 50)
+                .addComponent(jButtonFill)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(39, 39, 39)
+                .addGap(10, 10, 10)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButtonAdd)
                     .addComponent(jButtonDelete)
                     .addComponent(jButtonCalculate))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButtonClear)
+                    .addComponent(jButtonFill))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(31, Short.MAX_VALUE))
@@ -193,9 +220,9 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(2, 2, 2)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addGap(0, 6, Short.MAX_VALUE))
         );
 
         pack();
@@ -208,26 +235,25 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     private void jButtonAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddActionPerformed
         // TODO add your handling code here:
         double upperLim;
-    double lowLim;
-    double step;
+        double lowLim;
+        double step;
 
-    try {
         lowLim = Double.parseDouble(jTextFieldLowerLimit.getText());
         upperLim = Double.parseDouble(jTextFieldUpperLimit.getText());
         step = Double.parseDouble(jTextFieldStep.getText());
 
+        RecIntegral rec = new RecIntegral(lowLim, upperLim, step);
+        arrInteg.add(rec);
+        
         DefaultTableModel tModel = (DefaultTableModel) jTable1.getModel();
 
-        tModel.addRow(new Object[]{lowLim, upperLim, step, ""});
+        tModel.addRow(new Object[]{rec.getLowLim(), rec.getUpperLim(), rec.getStep()});
 
-        // Optional: clear fields after adding
         jTextFieldLowerLimit.setText("");
         jTextFieldUpperLimit.setText("");
         jTextFieldStep.setText("");
 
-    } catch (NumberFormatException e) {
-        JOptionPane.showMessageDialog(null, "Please enter valid numbers!");
-    }
+
     }//GEN-LAST:event_jButtonAddActionPerformed
 
     private void jButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteActionPerformed
@@ -235,10 +261,12 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         DefaultTableModel tModel = (DefaultTableModel) jTable1.getModel();
         
         int rowNum = jTable1.getSelectedRow();
+        
         if (rowNum == -1){
             JOptionPane.showMessageDialog(null, "You need to select a row");
         }else{
             tModel.removeRow(rowNum);
+            arrInteg.remove(rowNum);
         }
     }//GEN-LAST:event_jButtonDeleteActionPerformed
 
@@ -250,18 +278,46 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null,"You need to select a row");
         }else{
             DefaultTableModel tModel = (DefaultTableModel) jTable1.getModel();
+            
             double upperLim;
             double lowLim;
             double step;
             double result;
+            
             lowLim = Double.parseDouble(tModel.getValueAt(rowNum, 0).toString());
             upperLim = Double.parseDouble(tModel.getValueAt(rowNum, 1).toString());
             step = Double.parseDouble(tModel.getValueAt(rowNum, 2).toString());
             
-            result = CalcIntegral(lowLim, upperLim, step);
+            RecIntegral rec = new RecIntegral(lowLim, upperLim, step);
+            
+            result = rec.CalcIntegral(rec.getLowLim(), rec.getUpperLim(), rec.getStep());
+            
+            rec.setResult(result);
             tModel.setValueAt(result, rowNum, 3);
+            arrInteg.set(rowNum, rec);
     }
     }//GEN-LAST:event_jButtonCalculateActionPerformed
+
+    private void jButtonClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearActionPerformed
+        // TODO add your handling code here:
+        DefaultTableModel tModel = (DefaultTableModel) jTable1.getModel();
+        tModel.setNumRows(0);
+    }//GEN-LAST:event_jButtonClearActionPerformed
+
+    private void jButtonFillActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonFillActionPerformed
+        // TODO add your handling code here:
+        DefaultTableModel tModel = (DefaultTableModel) jTable1.getModel();
+        tModel.setNumRows(0);
+        
+        for(RecIntegral item: arrInteg){
+            tModel.addRow(new Object[]{
+                item.getLowLim(),
+                item.getUpperLim(),
+                item.getStep(),
+                item.getResult()
+        });
+        }
+    }//GEN-LAST:event_jButtonFillActionPerformed
 
     public double CalcIntegral(double lowLim, double upLim, double step)
 {
@@ -317,7 +373,9 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButtonAdd;
     private javax.swing.JButton jButtonCalculate;
+    private javax.swing.JButton jButtonClear;
     private javax.swing.JButton jButtonDelete;
+    private javax.swing.JButton jButtonFill;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
