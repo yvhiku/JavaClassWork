@@ -20,8 +20,7 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     public JavaIntegralCalculation() {
         initComponents();
     }
-
-    
+ 
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -237,7 +236,8 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         double upperLim;
         double lowLim;
         double step;
-
+        
+        try{
         lowLim = Double.parseDouble(jTextFieldLowerLimit.getText());
         upperLim = Double.parseDouble(jTextFieldUpperLimit.getText());
         step = Double.parseDouble(jTextFieldStep.getText());
@@ -248,12 +248,20 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         DefaultTableModel tModel = (DefaultTableModel) jTable1.getModel();
 
         tModel.addRow(new Object[]{rec.getLowLim(), rec.getUpperLim(), rec.getStep()});
-
+        
+        }catch (NumberFormatException ex) {
+        JOptionPane.showMessageDialog(this,
+                "Enter the correct numbers",
+                "input error", JOptionPane.ERROR_MESSAGE);
+        } catch (InvalidRangeException exe) {
+            JOptionPane.showMessageDialog(this,
+                    exe.getMessage()+ "your data: " + exe.getErrVal(),
+                    "input error", JOptionPane.WARNING_MESSAGE);
+        }finally {
         jTextFieldLowerLimit.setText("");
         jTextFieldUpperLimit.setText("");
         jTextFieldStep.setText("");
-
-
+        }
     }//GEN-LAST:event_jButtonAddActionPerformed
 
     private void jButtonDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDeleteActionPerformed
@@ -284,6 +292,7 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
             double step;
             double result;
             
+            try{
             lowLim = Double.parseDouble(tModel.getValueAt(rowNum, 0).toString());
             upperLim = Double.parseDouble(tModel.getValueAt(rowNum, 1).toString());
             step = Double.parseDouble(tModel.getValueAt(rowNum, 2).toString());
@@ -295,6 +304,19 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
             rec.setResult(result);
             tModel.setValueAt(result, rowNum, 3);
             arrInteg.set(rowNum, rec);
+            }catch (NumberFormatException ex) {
+        JOptionPane.showMessageDialog(this,
+                "Enter the correct numbers",
+                "input error", JOptionPane.ERROR_MESSAGE);
+        }catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this,
+                e.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
+        }   catch (InvalidRangeException exe) {
+            JOptionPane.showMessageDialog(this,
+                    exe.getMessage()+ "your data: " + exe.getErrVal(),
+                    "input error", JOptionPane.WARNING_MESSAGE);
+        }
     }
     }//GEN-LAST:event_jButtonCalculateActionPerformed
 
@@ -351,15 +373,11 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
                     break;
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(JavaIntegralCalculation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(JavaIntegralCalculation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(JavaIntegralCalculation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(JavaIntegralCalculation.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        
         //</editor-fold>
 
         /* Create and display the form */

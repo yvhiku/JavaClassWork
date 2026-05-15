@@ -13,13 +13,30 @@ public class RecIntegral {
     private double lowLim;
     private double step;
     private double result;
+    private static final double MIN_VALUE = 0.000001;
+    private static final double MAX_VALUE = 1000000.0;
+    
+    private void validateRange(double value) throws InvalidRangeException {
+        if (value <MIN_VALUE || value > MAX_VALUE){
+            throw new InvalidRangeException(
+            "the data value must be in range from " +
+            MIN_VALUE + "to" + MAX_VALUE + "\n", value);
+        }
+        }
 
 
-    public RecIntegral(double lowLim, double upperLim, double step){
+    public RecIntegral(double lowLim, double upperLim, double step) throws InvalidRangeException {
+        validateRange(lowLim);
+        validateRange(upperLim);
+        validateRange(step);
         this.lowLim = lowLim;
         this.upperLim = upperLim;
         this.step = step;
         this.result = 0.0;
+        
+        
+        
+        
     }
 
     public RecIntegral(double lowLim, double upperLim, double step, double result){
