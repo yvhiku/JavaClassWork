@@ -51,6 +51,8 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         jMenu1 = new javax.swing.JMenu();
         jMenuItemSaveText = new javax.swing.JMenuItem();
         jMenuItemLoadText = new javax.swing.JMenuItem();
+        jMenuItemSaveBinary = new javax.swing.JMenuItem();
+        jMenuItemLoadBinary = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
 
         jTextArea1.setColumns(20);
@@ -209,6 +211,22 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         });
         jMenu1.add(jMenuItemLoadText);
 
+        jMenuItemSaveBinary.setText("Save Binary");
+        jMenuItemSaveBinary.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSaveBinaryActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItemSaveBinary);
+
+        jMenuItemLoadBinary.setText("Load Binary");
+        jMenuItemLoadBinary.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemLoadBinaryActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItemLoadBinary);
+
         jMenuBar1.add(jMenu1);
 
         jMenu2.setText("Edit");
@@ -362,6 +380,70 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     }
     }//GEN-LAST:event_jMenuItemLoadTextActionPerformed
 
+    private void jMenuItemSaveBinaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveBinaryActionPerformed
+        // TODO add your handling code here:
+        JFileChooser chooser = new JFileChooser();
+
+    if (chooser.showSaveDialog(this)
+            != JFileChooser.APPROVE_OPTION) {
+        return;
+    }
+
+    File file = chooser.getSelectedFile();
+
+    if (!file.getName().toLowerCase().endsWith(".dat")) {
+        file = new File(file.getAbsolutePath() + ".dat");
+    }
+
+    try {
+        WriteBinaryFile writer = new WriteBinaryFile();
+        writer.saveTable(file, jTable1);
+
+        JOptionPane.showMessageDialog(
+                this, "Binary data saved successfully!");
+
+    } catch (IOException ex) {
+        JOptionPane.showMessageDialog(
+                this, "Error saving binary file: "
+                        + ex.getMessage());
+    }
+    }//GEN-LAST:event_jMenuItemSaveBinaryActionPerformed
+
+    private void jMenuItemLoadBinaryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadBinaryActionPerformed
+        // TODO add your handling code here:
+        JFileChooser chooser = new JFileChooser();
+
+    if (chooser.showOpenDialog(this)
+            != JFileChooser.APPROVE_OPTION) {
+        return;
+    }
+
+    File file = chooser.getSelectedFile();
+
+    try {
+        ReadBinaryFile reader = new ReadBinaryFile();
+        java.util.List<Object[]> rows =
+                reader.loadTable(file);
+
+        DefaultTableModel model =
+                (DefaultTableModel) jTable1.getModel();
+
+        model.setRowCount(0);
+
+        for (Object[] row : rows) {
+            model.addRow(row);
+        }
+
+        JOptionPane.showMessageDialog(
+                this, "Binary data loaded successfully!");
+
+    } catch (IOException | ClassNotFoundException ex) {
+        JOptionPane.showMessageDialog(
+                this, "Error loading binary file: "
+                        + ex.getMessage());
+    }
+    }//GEN-LAST:event_jMenuItemLoadBinaryActionPerformed
+
     public double CalcIntegral(double lowLim, double upLim, double step)
 {
     double start = lowLim;
@@ -420,7 +502,9 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItemLoadBinary;
     private javax.swing.JMenuItem jMenuItemLoadText;
+    private javax.swing.JMenuItem jMenuItemSaveBinary;
     private javax.swing.JMenuItem jMenuItemSaveText;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
