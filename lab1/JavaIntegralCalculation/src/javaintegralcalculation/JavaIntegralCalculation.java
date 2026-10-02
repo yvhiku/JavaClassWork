@@ -6,10 +6,7 @@ package javaintegralcalculation;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JOptionPane;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -301,33 +298,25 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonCalculateActionPerformed
 
     private void jMenuItemSaveTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveTextActionPerformed
-        JFileChooser f = new JFileChooser();
+        JFileChooser chooser = new JFileChooser();
     FileNameExtensionFilter filter =
             new FileNameExtensionFilter("Text files (*.txt)", "txt");
-    f.setFileFilter(filter);
+    chooser.setFileFilter(filter);
 
-    if (f.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+    if (chooser.showSaveDialog(this)
+            != JFileChooser.APPROVE_OPTION) {
         return;
     }
 
-    File file = f.getSelectedFile();
+    File file = chooser.getSelectedFile();
 
     if (!file.getName().toLowerCase().endsWith(".txt")) {
         file = new File(file.getAbsolutePath() + ".txt");
     }
 
-    DefaultTableModel model =
-            (DefaultTableModel) jTable1.getModel();
-
-    try (FileWriter writer = new FileWriter(file, false)) {
-        for (int i = 0; i < model.getRowCount(); i++) {
-            writer.write(
-                    model.getValueAt(i, 0) + " " +
-                    model.getValueAt(i, 1) + " " +
-                    model.getValueAt(i, 2) + " " +
-                    model.getValueAt(i, 3) + "\n"
-            );
-        }
+    try {
+        WriteFile writer = new WriteFile();
+        writer.saveTable(file, jTable1);
 
         JOptionPane.showMessageDialog(
                 this, "Data saved successfully!");
@@ -339,71 +328,25 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItemSaveTextActionPerformed
 
     private void jMenuItemLoadTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadTextActionPerformed
-        JFileChooser f = new JFileChooser();
+        JFileChooser chooser = new JFileChooser();
     FileNameExtensionFilter filter =
             new FileNameExtensionFilter("Text files (*.txt)", "txt");
-    f.setFileFilter(filter);
+    chooser.setFileFilter(filter);
 
-    if (f.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+    if (chooser.showOpenDialog(this)
+            != JFileChooser.APPROVE_OPTION) {
         return;
     }
 
-    File file = f.getSelectedFile();
+    File file = chooser.getSelectedFile();
 
-    DefaultTableModel model =
-            (DefaultTableModel) jTable1.getModel();
+    try {
+        ReadFile reader = new ReadFile();
+        java.util.List<Object[]> rows = reader.loadTable(file);
 
-    // Read and validate the entire file before changing the table.
-    java.util.ArrayList<Object[]> rows =
-            new java.util.ArrayList<>();
+        DefaultTableModel model =
+                (DefaultTableModel) jTable1.getModel();
 
-    try (BufferedReader reader =
-                 new BufferedReader(new FileReader(file))) {
-
-        String line;
-        int lineNumber = 0;
-
-        while ((line = reader.readLine()) != null) {
-            lineNumber++;
-
-            if (line.trim().isEmpty()) {
-                continue;
-            }
-
-            String[] parts = line.trim().split("\\s+");
-
-            if (parts.length != 4) {
-                throw new IOException(
-                        "Invalid data format at line " + lineNumber);
-            }
-
-            try {
-                double lowLim = Double.parseDouble(parts[0]);
-                double upperLim = Double.parseDouble(parts[1]);
-                double step = Double.parseDouble(parts[2]);
-                double result = Double.parseDouble(parts[3]);
-
-                if (!Double.isFinite(lowLim)
-                        || !Double.isFinite(upperLim)
-                        || !Double.isFinite(step)
-                        || !Double.isFinite(result)
-                        || step <= 0
-                        || upperLim <= lowLim) {
-                    throw new IOException(
-                            "Invalid values at line " + lineNumber);
-                }
-
-                rows.add(new Object[]{
-                    lowLim, upperLim, step, result
-                });
-
-            } catch (NumberFormatException ex) {
-                throw new IOException(
-                        "Invalid number at line " + lineNumber, ex);
-            }
-        }
-
-        // Replace existing rows only after successful reading.
         model.setRowCount(0);
 
         for (Object[] row : rows) {
