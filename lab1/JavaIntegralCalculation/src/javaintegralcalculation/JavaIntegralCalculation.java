@@ -297,22 +297,142 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     private void jButtonCalculateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCalculateActionPerformed
         // TODO add your handling code here:
         int rowNum = jTable1.getSelectedRow();
-        
-        if(rowNum == -1){
-            JOptionPane.showMessageDialog(null,"You need to select a row");
-        }else{
-            DefaultTableModel tModel = (DefaultTableModel) jTable1.getModel();
-            double upperLim;
-            double lowLim;
-            double step;
-            double result;
-            lowLim = Double.parseDouble(tModel.getValueAt(rowNum, 0).toString());
-            upperLim = Double.parseDouble(tModel.getValueAt(rowNum, 1).toString());
-            step = Double.parseDouble(tModel.getValueAt(rowNum, 2).toString());
-            
-            result = CalcIntegral(lowLim, upperLim, step);
-            tModel.setValueAt(result, rowNum, 3);
+
+    if (rowNum == -1) {
+        JOptionPane.showMessageDialog(
+                this,
+                "You need to select a row"
+        );
+        return;
     }
+
+    DefaultTableModel tModel =
+            (DefaultTableModel) jTable1.getModel();
+
+    double upperLim;
+    double lowLim;
+    double step;
+
+    try {
+        lowLim = Double.parseDouble(
+                tModel.getValueAt(rowNum, 0).toString());
+
+        upperLim = Double.parseDouble(
+                tModel.getValueAt(rowNum, 1).toString());
+
+        step = Double.parseDouble(
+                tModel.getValueAt(rowNum, 2).toString());
+
+    } catch (NumberFormatException ex) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Please enter valid numbers."
+        );
+        return;
+    }
+
+    if (upperLim <= lowLim || step <= 0) {
+
+        JOptionPane.showMessageDialog(
+                this,
+                "Upper limit must be greater than lower limit, "
+                + "and step must be greater than 0."
+        );
+        return;
+    }
+
+    final int selectedRow = rowNum;
+
+    Thread calculationThread = new Thread(() -> {
+
+        final int NUMBER_OF_THREADS = 10;
+
+        double interval = upperLim - lowLim;
+        double partSize = interval / NUMBER_OF_THREADS;
+
+        IntegralRunnable[] tasks =
+                new IntegralRunnable[NUMBER_OF_THREADS];
+
+        Thread[] threads =
+                new Thread[NUMBER_OF_THREADS];
+
+        for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+
+            double partLow =
+                    lowLim + i * partSize;
+
+            double partHigh;
+
+            if (i == NUMBER_OF_THREADS - 1) {
+                partHigh = upperLim;
+            } else {
+                partHigh =
+                        lowLim + (i + 1) * partSize;
+            }
+
+            tasks[i] =
+                    new IntegralRunnable(
+                            partLow,
+                            partHigh,
+                            step
+                    );
+
+            threads[i] =
+                    new Thread(
+                            tasks[i],
+                            "Integral Thread " + (i + 1)
+                    );
+
+            threads[i].start();
+        }
+
+        double result = 0.0;
+
+        try {
+
+            for (int i = 0; i < NUMBER_OF_THREADS; i++) {
+                threads[i].join();
+                result += tasks[i].getResult();
+            }
+
+            final double finalResult = result;
+
+            javax.swing.SwingUtilities.invokeLater(() -> {
+
+                DefaultTableModel model =
+                        (DefaultTableModel) jTable1.getModel();
+
+                model.setValueAt(
+                        finalResult,
+                        selectedRow,
+                        3
+                );
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Calculation completed using "
+                        + NUMBER_OF_THREADS
+                        + " threads."
+                );
+            });
+
+        } catch (InterruptedException ex) {
+
+            Thread.currentThread().interrupt();
+
+            javax.swing.SwingUtilities.invokeLater(() -> {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Calculation was interrupted."
+                );
+            });
+        }
+
+    }, "Integral Calculator");
+
+    calculationThread.start();
     }//GEN-LAST:event_jButtonCalculateActionPerformed
 
     private void jMenuItemSaveTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveTextActionPerformed
