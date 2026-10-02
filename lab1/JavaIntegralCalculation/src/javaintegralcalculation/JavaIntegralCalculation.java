@@ -296,7 +296,7 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
 
     private void jButtonCalculateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCalculateActionPerformed
         // TODO add your handling code here:
-        int rowNum = jTable1.getSelectedRow();
+         int rowNum = jTable1.getSelectedRow();
 
     if (rowNum == -1) {
         JOptionPane.showMessageDialog(
@@ -314,6 +314,7 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     double step;
 
     try {
+
         lowLim = Double.parseDouble(
                 tModel.getValueAt(rowNum, 0).toString());
 
@@ -351,52 +352,51 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         double interval = upperLim - lowLim;
         double partSize = interval / NUMBER_OF_THREADS;
 
-        IntegralRunnable[] tasks =
-                new IntegralRunnable[NUMBER_OF_THREADS];
+        java.util.concurrent.ExecutorService executor =
+                java.util.concurrent.Executors
+                        .newFixedThreadPool(NUMBER_OF_THREADS);
 
-        Thread[] threads =
-                new Thread[NUMBER_OF_THREADS];
-
-        for (int i = 0; i < NUMBER_OF_THREADS; i++) {
-
-            double partLow =
-                    lowLim + i * partSize;
-
-            double partHigh;
-
-            if (i == NUMBER_OF_THREADS - 1) {
-                partHigh = upperLim;
-            } else {
-                partHigh =
-                        lowLim + (i + 1) * partSize;
-            }
-
-            tasks[i] =
-                    new IntegralRunnable(
-                            partLow,
-                            partHigh,
-                            step
-                    );
-
-            threads[i] =
-                    new Thread(
-                            tasks[i],
-                            "Integral Thread " + (i + 1)
-                    );
-
-            threads[i].start();
-        }
-
-        double result = 0.0;
+        java.util.List<java.util.concurrent.Future<Double>> futures =
+                new java.util.ArrayList<>();
 
         try {
 
             for (int i = 0; i < NUMBER_OF_THREADS; i++) {
-                threads[i].join();
-                result += tasks[i].getResult();
+
+                double partLow =
+                        lowLim + i * partSize;
+
+                double partHigh;
+
+                if (i == NUMBER_OF_THREADS - 1) {
+                    partHigh = upperLim;
+                } else {
+                    partHigh =
+                            lowLim + (i + 1) * partSize;
+                }
+
+                IntegralCallable task =
+                        new IntegralCallable(
+                                partLow,
+                                partHigh,
+                                step
+                        );
+
+                java.util.concurrent.Future<Double> future =
+                        executor.submit(task);
+
+                futures.add(future);
+            }
+
+            double result = 0.0;
+
+            for (java.util.concurrent.Future<Double> future : futures) {
+                result += future.get();
             }
 
             final double finalResult = result;
+
+            executor.shutdown();
 
             javax.swing.SwingUtilities.invokeLater(() -> {
 
@@ -413,13 +413,14 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
                         this,
                         "Calculation completed using "
                         + NUMBER_OF_THREADS
-                        + " threads."
+                        + " Callable tasks."
                 );
             });
 
         } catch (InterruptedException ex) {
 
             Thread.currentThread().interrupt();
+            executor.shutdownNow();
 
             javax.swing.SwingUtilities.invokeLater(() -> {
 
@@ -428,9 +429,22 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
                         "Calculation was interrupted."
                 );
             });
+
+        } catch (java.util.concurrent.ExecutionException ex) {
+
+            executor.shutdownNow();
+
+            javax.swing.SwingUtilities.invokeLater(() -> {
+
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Error during calculation: "
+                        + ex.getCause()
+                );
+            });
         }
 
-    }, "Integral Calculator");
+    }, "Callable Calculator");
 
     calculationThread.start();
     }//GEN-LAST:event_jButtonCalculateActionPerformed
