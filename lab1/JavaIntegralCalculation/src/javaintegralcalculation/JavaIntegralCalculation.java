@@ -301,76 +301,122 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     }//GEN-LAST:event_jButtonCalculateActionPerformed
 
     private void jMenuItemSaveTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveTextActionPerformed
-        // TODO add your handling code here:f
         JFileChooser f = new JFileChooser();
-        FileNameExtensionFilter filter = 
-                new FileNameExtensionFilter("Text file (*.txt)", "txt");
-        f.setFileFilter(filter);
-        f.showSaveDialog(null);
-        
-        File file = f.getSelectedFile();
-        
-        if(!file.getPath().endsWith(".txt"))
-        {
-            file = new File(file.getPath()+ ".txt");
+    FileNameExtensionFilter filter =
+            new FileNameExtensionFilter("Text files (*.txt)", "txt");
+    f.setFileFilter(filter);
+
+    if (f.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+        return;
+    }
+
+    File file = f.getSelectedFile();
+
+    if (!file.getName().toLowerCase().endsWith(".txt")) {
+        file = new File(file.getAbsolutePath() + ".txt");
+    }
+
+    DefaultTableModel model =
+            (DefaultTableModel) jTable1.getModel();
+
+    try (FileWriter writer = new FileWriter(file, false)) {
+        for (int i = 0; i < model.getRowCount(); i++) {
+            writer.write(
+                    model.getValueAt(i, 0) + " " +
+                    model.getValueAt(i, 1) + " " +
+                    model.getValueAt(i, 2) + " " +
+                    model.getValueAt(i, 3) + "\n"
+            );
         }
-        
-        try (FileWriter writer = new FileWriter(file, false))
-        {
-            for(RecIntegral o : arrInteg)
-            {
-                writer.write(o.getLowLim() + " " +
-                            o.getUpperLim() + " " +
-                            o.getStep() + " " +
-                            o.getResult() + "\n");
-                }
-            writer.flush();
-            writer.close();
-        } catch(IOException ex){
-            JOptionPane.showMessageDialog(null, ex);
-        }
+
+        JOptionPane.showMessageDialog(
+                this, "Data saved successfully!");
+
+    } catch (IOException ex) {
+        JOptionPane.showMessageDialog(
+                this, "Error saving file: " + ex.getMessage());
+    }
     }//GEN-LAST:event_jMenuItemSaveTextActionPerformed
 
     private void jMenuItemLoadTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadTextActionPerformed
-        // TODO add your handling code here:
         JFileChooser f = new JFileChooser();
-        FileNameExtensionFilter filter = 
-                new FileNameExtensionFilter("Text file (*.txt)", "txt");
-        f.setFileFilter(filter);
-        f.showSaveDialog(null);
-        
-        File file = f.getSelectedFile();
-        try(BufferedReader reader = new BufferedReader(new FileReader(file))){
-            arrInteg.clear();
-            String temp = " ";
-            while((temp = reader.readLine())!= null){
-                String[] part = temp.split(" ");
-                arrInteg.add(new RecIntegral(
-                        Double.parseDouble(part[0]),
-                        Double.parseDouble(part[1]),
-                        Double.parseDouble(part[2]),
-                        Double.parseDouble(part[3])
-                ));
-            };
-            reader.close();
-            
-            DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-            model.setRowCount(0);
-            arrInteg.forEach((RecIntegral obj)->{
-                model.addRow(new Object[]{obj.getLowlim(),
-                    obj.getUpperLim(),
-                    obj.getStep(),
-                    obj.getResult()
+    FileNameExtensionFilter filter =
+            new FileNameExtensionFilter("Text files (*.txt)", "txt");
+    f.setFileFilter(filter);
+
+    if (f.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) {
+        return;
+    }
+
+    File file = f.getSelectedFile();
+
+    DefaultTableModel model =
+            (DefaultTableModel) jTable1.getModel();
+
+    // Read and validate the entire file before changing the table.
+    java.util.ArrayList<Object[]> rows =
+            new java.util.ArrayList<>();
+
+    try (BufferedReader reader =
+                 new BufferedReader(new FileReader(file))) {
+
+        String line;
+        int lineNumber = 0;
+
+        while ((line = reader.readLine()) != null) {
+            lineNumber++;
+
+            if (line.trim().isEmpty()) {
+                continue;
+            }
+
+            String[] parts = line.trim().split("\\s+");
+
+            if (parts.length != 4) {
+                throw new IOException(
+                        "Invalid data format at line " + lineNumber);
+            }
+
+            try {
+                double lowLim = Double.parseDouble(parts[0]);
+                double upperLim = Double.parseDouble(parts[1]);
+                double step = Double.parseDouble(parts[2]);
+                double result = Double.parseDouble(parts[3]);
+
+                if (!Double.isFinite(lowLim)
+                        || !Double.isFinite(upperLim)
+                        || !Double.isFinite(step)
+                        || !Double.isFinite(result)
+                        || step <= 0
+                        || upperLim <= lowLim) {
+                    throw new IOException(
+                            "Invalid values at line " + lineNumber);
+                }
+
+                rows.add(new Object[]{
+                    lowLim, upperLim, step, result
                 });
-            });
+
+            } catch (NumberFormatException ex) {
+                throw new IOException(
+                        "Invalid number at line " + lineNumber, ex);
+            }
         }
-        catch(IOException ex){
-            JOptionPane.showMessageDialog(null, ex);}
-        catch(InvalidRangerException exe) {
-                JOptionPane.showMessageDialog(this, exe.getMessage() + "Your Data: " + exe.getErrVal(),
-                        "Input error", JOptionPane.WARNING_MESSAGE
-                        );}
-        
+
+        // Replace existing rows only after successful reading.
+        model.setRowCount(0);
+
+        for (Object[] row : rows) {
+            model.addRow(row);
+        }
+
+        JOptionPane.showMessageDialog(
+                this, "Data loaded successfully!");
+
+    } catch (IOException ex) {
+        JOptionPane.showMessageDialog(
+                this, "Error loading file: " + ex.getMessage());
+    }
     }//GEN-LAST:event_jMenuItemLoadTextActionPerformed
 
     public double CalcIntegral(double lowLim, double upLim, double step)
