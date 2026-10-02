@@ -6,6 +6,10 @@ package javaintegralcalculation;
 
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JOptionPane;
+import java.io.File;
+import java.io.IOException;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 /**
  *
  * @author student_m
@@ -43,6 +47,11 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
         jButtonCalculate = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        jMenu1 = new javax.swing.JMenu();
+        jMenuItemSaveText = new javax.swing.JMenuItem();
+        jMenuItemLoadText = new javax.swing.JMenuItem();
+        jMenu2 = new javax.swing.JMenu();
 
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
@@ -182,6 +191,31 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
                 .addContainerGap(31, Short.MAX_VALUE))
         );
 
+        jMenu1.setText("File");
+
+        jMenuItemSaveText.setText("save");
+        jMenuItemSaveText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemSaveTextActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItemSaveText);
+
+        jMenuItemLoadText.setText("load");
+        jMenuItemLoadText.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemLoadTextActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItemLoadText);
+
+        jMenuBar1.add(jMenu1);
+
+        jMenu2.setText("Edit");
+        jMenuBar1.add(jMenu2);
+
+        setJMenuBar(jMenuBar1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -263,6 +297,71 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     }
     }//GEN-LAST:event_jButtonCalculateActionPerformed
 
+    private void jMenuItemSaveTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemSaveTextActionPerformed
+        JFileChooser chooser = new JFileChooser();
+    FileNameExtensionFilter filter =
+            new FileNameExtensionFilter("Text files (*.txt)", "txt");
+    chooser.setFileFilter(filter);
+
+    if (chooser.showSaveDialog(this)
+            != JFileChooser.APPROVE_OPTION) {
+        return;
+    }
+
+    File file = chooser.getSelectedFile();
+
+    if (!file.getName().toLowerCase().endsWith(".txt")) {
+        file = new File(file.getAbsolutePath() + ".txt");
+    }
+
+    try {
+        WriteFile writer = new WriteFile();
+        writer.saveTable(file, jTable1);
+
+        JOptionPane.showMessageDialog(
+                this, "Data saved successfully!");
+
+    } catch (IOException ex) {
+        JOptionPane.showMessageDialog(
+                this, "Error saving file: " + ex.getMessage());
+    }
+    }//GEN-LAST:event_jMenuItemSaveTextActionPerformed
+
+    private void jMenuItemLoadTextActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemLoadTextActionPerformed
+        JFileChooser chooser = new JFileChooser();
+    FileNameExtensionFilter filter =
+            new FileNameExtensionFilter("Text files (*.txt)", "txt");
+    chooser.setFileFilter(filter);
+
+    if (chooser.showOpenDialog(this)
+            != JFileChooser.APPROVE_OPTION) {
+        return;
+    }
+
+    File file = chooser.getSelectedFile();
+
+    try {
+        ReadFile reader = new ReadFile();
+        java.util.List<Object[]> rows = reader.loadTable(file);
+
+        DefaultTableModel model =
+                (DefaultTableModel) jTable1.getModel();
+
+        model.setRowCount(0);
+
+        for (Object[] row : rows) {
+            model.addRow(row);
+        }
+
+        JOptionPane.showMessageDialog(
+                this, "Data loaded successfully!");
+
+    } catch (IOException ex) {
+        JOptionPane.showMessageDialog(
+                this, "Error loading file: " + ex.getMessage());
+    }
+    }//GEN-LAST:event_jMenuItemLoadTextActionPerformed
+
     public double CalcIntegral(double lowLim, double upLim, double step)
 {
     double start = lowLim;
@@ -318,6 +417,11 @@ public class JavaIntegralCalculation extends javax.swing.JFrame {
     private javax.swing.JButton jButtonAdd;
     private javax.swing.JButton jButtonCalculate;
     private javax.swing.JButton jButtonDelete;
+    private javax.swing.JMenu jMenu1;
+    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItemLoadText;
+    private javax.swing.JMenuItem jMenuItemSaveText;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
